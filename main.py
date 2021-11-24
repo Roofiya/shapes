@@ -1,5 +1,6 @@
 import sys
 import os
+import turtle
 from math import pi
 import yaml
 
@@ -36,6 +37,19 @@ class Circle:
         return string
 	    #return f"Instance of {self.__class__.__qualname__}"
 
+    def draw(self, pen):
+        """Draw a circle"""
+        if pen.isdown():
+            pen.up()
+        pen.goto(*self._at)
+        pen.down()
+        pen.begin_fill()
+        pen.pencolor(self._stroke)
+        pen.fillcolor(self._fill)
+        pen.circle(self._radius) ##*args, **kwargs
+        pen.end_fill()
+        pen.up()
+
     @classmethod
     def from_yaml(cls,string):
         """Create a circle from a yaml STRING"""
@@ -56,27 +70,78 @@ class Canvas:
 
 
 class Text:
-    def __init__(self, text, font = 15, color='black'):
+    def __init__(self, text, at= (0,0)):
         self._text = text
-        self._font = font
-        self._color = color
+        self._at = at
+
+    def write(self, pen, *args, **kwargs):
+        pen.up()
+        pen.goto(self._at)
+        pen.down()
+        pen.write(self._text, *args,**kwargs)
+        pen.up()
+
+
+
+
 
 class Quadrilateral:
     shape = 'quadrilateral'
 
-    def __init__(self, width, height, fill='green', stroke='yellow'):
+    def __init__(self, width, height, fill='green', stroke='yellow',at = (0,0)):
         self._width = width
         self._height = height
         self._fill = fill
         self._stroke = stroke
+        self._at = at
 
     def calculate_qarea(self):
         '''Calculate area'''
         return self._width * self._height
 
+    @property
+    def left(self):
+        return self._at[0] -self._width/2
+
+    @property
+    def top(self):
+        return self._at[1] + self._height / 2
+
+    @property
+    def right(self):
+        return self._at[0] + self._width / 2
+
+    @property
+    def bottom(self):
+        return self._at[1] - self._height / 2
+    @property
+    def vertices(self):
+        """ Starting from the top left counter clockwise"""
+        return [
+            (self.left, self.top),
+            (self.left, self.bottom),
+            (self.right, self.bottom),
+            (self.right, self.top)
+        ]
+    def draw(self, pen, *args, **kwargs):
+        """Draw a Quadrilateral"""
+
+        pen.up()
+        pen.goto(self.left, self.top)
+        pen.down()
+        pen.goto(self.left, self.bottom)
+        pen.goto(self.right, self.bottom)
+        pen.goto(self.right, self.top)
+        pen.goto(self.left, self.top)
+        pen.begin_fill()
+        pen.pencolor(self._stroke)
+        pen.fillcolor(self._fill)
+        pen.end_fill()
+        pen.up()
+
 
 def main():
-    circle = Circle(5.0, fill='orange', stroke='red')
+    circle = Circle(15.0, fill='orange', stroke='red')
     print(f"area = {circle.calculate_area()}")
     #print(circle._radius)
     #circle.radius = 3
@@ -99,8 +164,19 @@ circle:
   radius: 5.0
   stroke: red"""
     my_circle = Circle.from_yaml(yaml_circle)
+    pen = turtle.Turtle()
+    text= Text("This was written by a Turtle")
+    print(text)
+    text.write(pen,font=('Arial', 30,'bold'))
 
-    quad = Quadrilateral(5.0, 7.0, fill='orange', stroke='red')
+    circle.draw(pen)
+
+    quad = Quadrilateral(200.0, 60.0, at=(15,-5))
+    print(f"vertices = {quad.vertices}")
+    quad.draw(pen)
+    turtle.done()
+
+
 
     my_dict ={
         'key':{
