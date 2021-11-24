@@ -4,15 +4,16 @@ import turtle
 from math import pi
 import yaml
 
+turtle.tracer(False)
 class Circle:
-    def __init__(self, radius, fill='red', stroke='black', at =(0,0)):
+    def __init__(self, radius, fill='red', stroke='black', at=(0, 0)):
         self._radius = radius #private/protected
         self._fill = fill
         self._stroke = stroke
-        self._at= at
+        self._at = at
 
     def calculate_area(self):
-        '''Calculate area'''
+        """Calculate area"""
         return pi * self._radius ** 2
 
     @property # decorator # Public access for radius - read only
@@ -51,7 +52,7 @@ class Circle:
         pen.up()
 
     @classmethod
-    def from_yaml(cls,string):
+    def from_yaml(cls, string):
         """Create a circle from a yaml STRING"""
         circle_dict = yaml.load(string, Loader=yaml.Loader)['circle']
         print(circle_dict)
@@ -62,15 +63,67 @@ class Circle:
     def __repr__(self):
         return f"Circle{self._radius} , fill={self._fill}, stroke={self._stroke}"
 
-class Canvas:
-    def __init__(self, width, height, bg='blue'):
+# class Canvas:
+#     def __init__(self, width, height, bg='blue'):
+#         self._width = width
+#         self._height = height
+#         self._bg = bg
+
+class Canvas(turtle.TurtleScreen):
+    def __init__(self, width, height, bg='#ffffff'):
+        self._cv = turtle.getcanvas()
+        super().__init__(self._cv)
+        self.screensize(width, height, bg=bg)
         self._width = width
         self._height = height
-        self._bg = bg
+        self._pen = turtle.Turtle()
+        self._pen.hideturtle()
+        # self._pen.speed(0)
+        # self.bgpic('funny.gif')
+        # self.onclick(self._report)
 
+    def draw_axes(self):
+        # self._pen.speed(0)
+        self._pen.up()
+        self._pen.goto(0, self._height / 2)
+        self._pen.down()
+        self._pen.goto(0, -self._height / 2)
+        self._pen.up()
+        self._pen.goto(-self._width / 2, 0)
+        self._pen.down()
+        self._pen.goto(self._width / 2, 0)
+        self._pen.up()
+        self._pen.goto(-self._width / 2, -self._height / 2)
+
+    def draw_grid(self, colour='#00ff99', hstep=50, vstep=50):
+        # self._pen.speed(0)
+        original_pen_colour = self._pen.pencolor()
+        self._pen.color(colour)
+        # vertical grids
+        self._pen.up()
+        for hpos in range(-500, 500 + hstep, hstep):
+            self._pen.goto(hpos, 350)
+            self._pen.down()
+            self._pen.goto(hpos, -350)
+            self._pen.up()
+        # horizontal grids
+        for vpos in range(-350, 350 + vstep, vstep):
+            self._pen.goto(-500, vpos)
+            self._pen.down()
+            self._pen.goto(500, vpos)
+            self._pen.up()
+        # reset
+        self._pen.pencolor(original_pen_colour)
+
+    def write(self, text, *args, **kwargs):
+        text.write(self._pen, *args, **kwargs)
+
+    def draw(self, shape):
+        """Draw the given shape"""
+        shape.draw(self._pen)
 
 class Text:
-    def __init__(self, text, at= (0,0)):
+    def __init__(self, text, at=(0, 0)):
         self._text = text
         self._at = at
 
@@ -78,7 +131,7 @@ class Text:
         pen.up()
         pen.goto(self._at)
         pen.down()
-        pen.write(self._text, *args,**kwargs)
+        pen.write(self._text, *args, **kwargs)
         pen.up()
 
 
@@ -88,7 +141,7 @@ class Text:
 class Quadrilateral:
     shape = 'quadrilateral'
 
-    def __init__(self, width, height, fill='green', stroke='yellow',at = (0,0)):
+    def __init__(self, width, height, fill='green', stroke='yellow', at=(0, 0)):
         self._width = width
         self._height = height
         self._fill = fill
@@ -96,7 +149,7 @@ class Quadrilateral:
         self._at = at
 
     def calculate_qarea(self):
-        '''Calculate area'''
+        """Calculate area"""
         return self._width * self._height
 
     @property
@@ -140,6 +193,7 @@ class Quadrilateral:
         pen.up()
 
 
+
 def main():
     circle = Circle(15.0, fill='orange', stroke='red')
     print(f"area = {circle.calculate_area()}")
@@ -167,20 +221,42 @@ circle:
     pen = turtle.Turtle()
     text= Text("This was written by a Turtle")
     print(text)
-    text.write(pen,font=('Arial', 30,'bold'))
+    text.write(pen, font=('Arial', 30, 'bold'))
 
     circle.draw(pen)
 
-    quad = Quadrilateral(200.0, 60.0, at=(15,-5))
+    quad = Quadrilateral(200.0, 60.0, at=(15, -5))
     print(f"vertices = {quad.vertices}")
     quad.draw(pen)
+
+
+    # canvas = Canvas(1000,700)#'magenta'
+    # canvas.draw_axes()
+    # canvas.draw_grid()
+    # canvas.write(text)
+    #
+    # canvas.draw(circle)
+
+    canvas = Canvas(1000, 700)  # 'magenta'
+    gquad = Quadrilateral(
+        200, 300, fill ='#009a44', stroke='white', at=(-200, 0)
+            )
+    wquad = Quadrilateral(
+        200, 300, fill='white', stroke='#dddddd', at=(0, 0)
+    )
+    oquad = Quadrilateral(
+        200, 300, fill='#ff8200', stroke='white', at=(200, 0)
+    )
+    text = Text('IRELAND', at=(0, -250))
+    canvas.draw(gquad)
+    canvas.draw(wquad)
+    canvas.draw(oquad)
+    canvas.write(text, align='center', font= ('Arial', 60, 'bold'))
     turtle.done()
 
-
-
-    my_dict ={
-        'key':{
-            'inside_dict': [5,6,7,8]
+    my_dict = {
+        'key': {
+            'inside_dict': [5, 6, 7, 8]
         }
     }
 
@@ -188,72 +264,6 @@ circle:
     print(my_yaml)
     print(my_circle)
     return 0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
