@@ -23,6 +23,11 @@ class Circle:
     def __call__(self):
         return "I am a circle!"
 
+    def __str__(self):
+	    return f"Instance of {self.__class__.__qualname__}"
+    def __repr__(self):
+        return f"Circle{self._radius} , fill={self._fill}, stroke={self._stroke}"
+
 def main():
     circle = Circle(5.0, fill='orange', stroke='red')
     print(f"area = {circle.calculate_area()}")
@@ -32,6 +37,10 @@ def main():
     #print(f"ra = {circle.rad()}")
     print(f"circumference is {len(circle)}")
     print(circle())
+    print(repr(circle))
+
+    # stringify the instance
+    print(str(circle))
     return 0
 
 
